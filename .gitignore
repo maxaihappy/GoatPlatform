@@ -14,6 +14,8 @@ frontend/.next/
 frontend/out/
 frontend/.env
 frontend/.env.local
+.firebase/
+firebase-debug*.log
 
 # IDE / OS
 .idea/

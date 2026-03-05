@@ -1,0 +1,37 @@
+# Build, push, and deploy frontend to Cloud Run (run from repo root: gcloud builds submit . --config=frontend/cloudbuild.yaml --project=festive-post-473500-c3)
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    dir: 'frontend'
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_API_URL=https://goat-platform-745118591625.us-central1.run.app'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/goat-platform-frontend:$BUILD_ID'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/goat-platform-frontend:latest'
+      - '.'
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/goat-platform-frontend:$BUILD_ID']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/goat-platform-frontend:latest']
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'goat-platform-frontend'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/goat-platform-frontend:$BUILD_ID'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--project'
+      - '$PROJECT_ID'
+images:
+  - 'gcr.io/$PROJECT_ID/goat-platform-frontend:$BUILD_ID'
+  - 'gcr.io/$PROJECT_ID/goat-platform-frontend:latest'
+options:
+  logging: CLOUD_LOGGING_ONLY

@@ -1,4 +1,5 @@
 """Application configuration from environment."""
+import os
 from typing import Optional
 from pydantic_settings import BaseSettings
 from functools import lru_cache
@@ -7,9 +8,14 @@ from functools import lru_cache
 class Settings(BaseSettings):
     """Settings loaded from environment."""
 
-    # API
+    # API (Cloud Run sets PORT; we use it when present)
     api_host: str = "0.0.0.0"
     api_port: int = 8000
+
+    @property
+    def port(self) -> int:
+        """Port to bind (Cloud Run sets PORT)."""
+        return int(os.environ.get("PORT", self.api_port))
 
     # OpenAI (script generation, thumbnail if using DALL-E)
     openai_api_key: Optional[str] = None

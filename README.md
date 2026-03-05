@@ -84,6 +84,42 @@ Open [http://localhost:3000](http://localhost:3000). Use the form to submit a ma
 - Store clips and final video in S3/GCS; serve via CDN.
 - Add Auth (e.g. NextAuth) and rate limits for production.
 
+## Deployment (Google Cloud Run)
+
+The API is deployed to **Google Cloud Run** (project `festive-post-473500-c3`):
+
+- **Service URL:** https://goat-platform-745118591625.us-central1.run.app  
+- **Health:** https://goat-platform-745118591625.us-central1.run.app/health  
+
+To redeploy after changes:
+
+```bash
+gcloud run deploy goat-platform --source=backend --region=us-central1 --project=festive-post-473500-c3
+```
+
+To set environment variables (e.g. `OPENAI_API_KEY`, `USE_MOCK_SCRIPT`):
+
+```bash
+gcloud run services update goat-platform --region=us-central1 --project=festive-post-473500-c3 \
+  --set-env-vars "USE_MOCK_SCRIPT=true"
+# Or from a file: --set-env-vars-file backend/.env (ensure no secrets in committed files)
+```
+
+### Frontend (Cloud Run, same project)
+
+The frontend is deployed to **Cloud Run** in the same project:
+
+- **URL:** https://goat-platform-frontend-agt77l6drq-uc.a.run.app  
+- **Backend API:** The app is built with `NEXT_PUBLIC_API_URL` pointing at the backend (goat-platform) Cloud Run URL.
+
+Redeploy the frontend (build + push + deploy) from the repo root:
+
+```bash
+gcloud builds submit . --config=frontend/cloudbuild.yaml --project=festive-post-473500-c3
+```
+
+Alternative: **Firebase Hosting** (static export) – see [docs/FRONTEND_HOSTING_GCP.md](docs/FRONTEND_HOSTING_GCP.md).
+
 ## Legal & compliance
 
 Using AI to generate video or voice that depicts or refers to **real people** can raise **right of publicity**, **defamation**, **deepfake**, and **privacy** issues. See **[docs/LEGAL_AND_COMPLIANCE.md](docs/LEGAL_AND_COMPLIANCE.md)** for risk areas and mitigations (disclaimers, labeling, vendor ToS, recommended practices). This project includes in-app disclaimers and ensures titles/descriptions are labeled as AI-simulated; you are responsible for using it in compliance with applicable law and platform terms.

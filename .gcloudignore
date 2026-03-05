@@ -1,0 +1,17 @@
+# Ignore local dev and build artifacts for Cloud Build
+.git
+.gitignore
+.env
+*.md
+backend/.venv
+backend/__pycache__
+backend/**/__pycache__
+backend/storage
+backend/output
+frontend/node_modules
+frontend/.next
+frontend/out
+*.log
+.idea
+.vscode
+.DS_Store
