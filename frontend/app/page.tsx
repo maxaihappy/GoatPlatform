@@ -62,6 +62,18 @@ export default function Home() {
   const [polling, setPolling] = useState(false);
   const [ackLegal, setAckLegal] = useState(false);
   const [showLegal, setShowLegal] = useState(false);
+  const [apiConnected, setApiConnected] = useState<boolean | null>(null);
+
+  // Check API connection on load
+  useEffect(() => {
+    if (!API_BASE) {
+      setApiConnected(null);
+      return;
+    }
+    fetch(`${API_BASE}/health`)
+      .then((r) => setApiConnected(r.ok))
+      .catch(() => setApiConnected(false));
+  }, [API_BASE]);
 
   const runPipeline = async () => {
     setRunning(true);
@@ -88,7 +100,8 @@ export default function Home() {
       const data = await res.json();
       setResult(data);
     } catch (e) {
-      setResult({ error: String(e) });
+      const msg = e instanceof Error ? e.message : String(e);
+      setResult({ error: msg });
     } finally {
       setRunning(false);
     }
@@ -119,7 +132,8 @@ export default function Home() {
       setJobId((data as { job_id?: string }).job_id ?? null);
       setPolling(true);
     } catch (e) {
-      setResult({ error: String(e) });
+      const msg = e instanceof Error ? e.message : String(e);
+      setResult({ error: msg });
       setRunning(false);
     }
   };
@@ -157,6 +171,13 @@ export default function Home() {
         <p className="text-zinc-400 mb-4">
           Generate a full highlight video from a single matchup request.
         </p>
+
+        {/* API connection status */}
+        {API_BASE && apiConnected !== null && (
+          <p className={`mb-4 text-sm ${apiConnected ? "text-green-400" : "text-red-400"}`}>
+            API: {apiConnected ? "Connected" : "Not reachable — check backend URL or try again."}
+          </p>
+        )}
 
         {/* Legal / compliance notice */}
         <div className="mb-6 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
@@ -235,15 +256,25 @@ export default function Home() {
               className="rounded border-zinc-600 text-amber-500 focus:ring-amber-500"
             />
             <label htmlFor="async" className="text-sm text-zinc-400">
-              Run in background (returns immediately, poll for status)
+              Run in background (returns immediately; status may not update on some hosts)
             </label>
           </div>
+          <p className="text-xs text-zinc-500">
+            Recommended: leave unchecked. Generation takes about 2–3 minutes — keep this page open until you see the result.
+          </p>
 
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col gap-3 pt-2">
+            {running && (
+              <div className="rounded-lg bg-amber-500/10 border border-amber-500/30 p-3 text-sm text-amber-200">
+                {asyncMode
+                  ? "Job started. Polling for status every few seconds…"
+                  : "Generating video… This usually takes 2–3 minutes. Please wait and don’t close this page."}
+              </div>
+            )}
             <button
               onClick={asyncMode ? runPipelineAsync : runPipeline}
               disabled={running || !ackLegal}
-              className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-semibold rounded-lg transition"
+              className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 disabled:bg-zinc-600 disabled:cursor-not-allowed text-zinc-950 font-semibold rounded-lg transition w-fit"
             >
               {running ? "Running…" : "Generate video"}
             </button>

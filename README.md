@@ -120,6 +120,13 @@ gcloud builds submit . --config=frontend/cloudbuild.yaml --project=festive-post-
 
 Alternative: **Firebase Hosting** (static export) – see [docs/FRONTEND_HOSTING_GCP.md](docs/FRONTEND_HOSTING_GCP.md).
 
+### "Generate video" button – how to get it to work
+
+1. **Acknowledge the legal notice** (checkbox) so the button is enabled.
+2. **Leave "Run in background" unchecked** so the request runs in one go (recommended). Generation takes about **2–3 minutes** with the default mock script (3 plays); keep the page open until the result appears.
+3. **Backend** must have `USE_MOCK_SCRIPT=true` and `USE_PLACEHOLDER_CLIPS=true` (already set on the deployed backend). If you see "API: Not reachable", the frontend cannot reach the backend URL.
+4. If you get an error, check the red message in the Result section; the backend returns details there (e.g. missing env, pipeline failure).
+
 ## Legal & compliance
 
 Using AI to generate video or voice that depicts or refers to **real people** can raise **right of publicity**, **defamation**, **deepfake**, and **privacy** issues. See **[docs/LEGAL_AND_COMPLIANCE.md](docs/LEGAL_AND_COMPLIANCE.md)** for risk areas and mitigations (disclaimers, labeling, vendor ToS, recommended practices). This project includes in-app disclaimers and ensures titles/descriptions are labeled as AI-simulated; you are responsible for using it in compliance with applicable law and platform terms.
